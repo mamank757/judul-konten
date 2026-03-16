@@ -2,7 +2,7 @@ name: Update Judul Konten
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -20,27 +20,30 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Ambil halaman
+    - name: Update judul setiap 1 menit
       run: |
-        curl -L https://www.bppbola.my.id/home/judul-konten -o page.html
 
-    - name: Ambil og:description
-      run: |
-        grep -oP '(?<=<meta property="og:description" content=").*?(?=")' page.html > raw.txt || true
-        cat raw.txt
-
-    - name: Pisahkan baris judul
-      run: |
-        echo "[" > judul.json
-        tr '\n' '\n' < raw.txt | awk 'NF{printf "\"%s\",\n",$0}' >> judul.json
-        sed -i '$ s/,$//' judul.json
-        echo "]" >> judul.json
-        cat judul.json
-
-    - name: Commit perubahan
-      run: |
         git config --global user.name "github-actions"
         git config --global user.email "actions@github.com"
-        git add judul.json
-        git commit -m "update judul otomatis" || echo "tidak ada perubahan"
-        git push
+
+        for i in {1..5}
+        do
+          echo "Update ke $i"
+
+          curl -sL https://www.bppbola.my.id/home/judul-konten -o page.html
+
+          META=$(grep -oP '(?<=<meta property="og:description" content=").*?(?=")' page.html || true)
+
+          echo "$META" > raw.txt
+
+          echo "[" > judul.json
+          awk 'NF{printf "\"%s\",\n",$0}' raw.txt >> judul.json
+          sed -i '$ s/,$//' judul.json
+          echo "]" >> judul.json
+
+          git add judul.json
+          git commit -m "update judul otomatis" || echo "tidak ada perubahan"
+          git push || true
+
+          sleep 60
+        done
