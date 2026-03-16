@@ -20,9 +20,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Ambil halaman bppbola
+    - name: Ambil halaman judul
       run: |
-        curl -L https://www.bppbola.my.id/judul-konten -o page.html
+        curl -L https://www.bppbola.my.id/home/judul-konten -o page.html
 
     - name: Ambil judul dari halaman
       run: |
