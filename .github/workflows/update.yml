@@ -20,20 +20,19 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Ambil halaman judul
+    - name: Ambil halaman
       run: |
         curl -L https://www.bppbola.my.id/home/judul-konten -o page.html
 
-    - name: Ambil judul dari halaman
+    - name: Ambil og:description
       run: |
-        grep -oP '(?<=<h[1-3][^>]*>).*?(?=</h[1-3]>)' page.html > meta.txt || true
-        echo "Judul ditemukan:"
-        cat meta.txt
+        grep -oP '(?<=<meta property="og:description" content=").*?(?=")' page.html > raw.txt || true
+        cat raw.txt
 
-    - name: Ubah ke JSON
+    - name: Pisahkan baris judul
       run: |
         echo "[" > judul.json
-        awk 'NF{printf "\"%s\",\n",$0}' meta.txt >> judul.json
+        tr '\n' '\n' < raw.txt | awk 'NF{printf "\"%s\",\n",$0}' >> judul.json
         sed -i '$ s/,$//' judul.json
         echo "]" >> judul.json
         cat judul.json
