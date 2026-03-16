@@ -20,13 +20,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Ambil halaman
+    - name: Ambil halaman bppbola
       run: |
         curl -L https://www.bppbola.my.id/judul-konten -o page.html
 
     - name: Ambil judul dari halaman
-  run: |
-    grep -oP '(?<=<h[1-3][^>]*>).*?(?=</h[1-3]>)' page.html > meta.txt || true
+      run: |
+        grep -oP '(?<=<h[1-3][^>]*>).*?(?=</h[1-3]>)' page.html > meta.txt || true
+        echo "Judul ditemukan:"
+        cat meta.txt
 
     - name: Ubah ke JSON
       run: |
@@ -34,6 +36,7 @@ jobs:
         awk 'NF{printf "\"%s\",\n",$0}' meta.txt >> judul.json
         sed -i '$ s/,$//' judul.json
         echo "]" >> judul.json
+        cat judul.json
 
     - name: Commit perubahan
       run: |
