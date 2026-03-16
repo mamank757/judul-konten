@@ -17,13 +17,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Ambil halaman bppbola
+    - name: Ambil halaman
       run: |
         curl -L https://www.bppbola.my.id/judul-konten -o page.html
 
-    - name: Ambil meta description
+    - name: Ambil deskripsi
       run: |
-        META=$(grep -oP '(?<=<meta property="og:description" content=").*?(?=")' page.html)
+        META=$(grep -oP '(?<=content=").*?(?=")' page.html | head -1 || true)
         echo "$META" > meta.txt
 
     - name: Ubah ke JSON
@@ -33,7 +33,7 @@ jobs:
         sed -i '$ s/,$//' judul.json
         echo "]" >> judul.json
 
-    - name: Commit perubahan
+    - name: Commit
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "actions@github.com"
